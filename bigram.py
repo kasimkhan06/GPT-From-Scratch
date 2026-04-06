@@ -205,23 +205,44 @@ m = model.to(device)
 optimizer = torch.optim.AdamW(m.parameters() , lr=1e-3)
 
 # training loop
+best_val_loss = float('inf')
+
+# training loop
 for iter in range(max_iters):
-  
-  # train val loss
-  if iter % eval_interval == 0:
-    losses = estimate_loss()
-    print(f"step {iter} : train los {losses['train']:.4f} , val loss : {losses['val']:.4f}")
-  
-  # sample a batch of data
-  xb , yb = get_batch('train')
+    
+    # train val loss
+    if iter % eval_interval == 0:
+        losses = estimate_loss()
+        print(f"step {iter}: train loss {losses['train']:.4f}, val loss: {losses['val']:.4f}")
+        
+        # --- NEW: Save Checkpoint if val loss improved ---
+        if losses['val'] < best_val_loss:
+            best_val_loss = losses['val']
+            checkpoint = {
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'iter': iter,
+                'loss': best_val_loss,
+            }
+            torch.save(checkpoint, 'best_model.pth')
+            print(f"--> Saved new best model at step {iter}")
 
-  # evaluate the loss
-  logits, loss = model(xb,yb)
-  optimizer.zero_grad(set_to_none=True)
-  loss.backward()
-  optimizer.step()
+    # sample a batch of data
+    xb, yb = get_batch('train')
 
+    # evaluate the loss
+    logits, loss = model(xb, yb)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
 
-#generate from model
+# Save the final version regardless of loss
+torch.save(model.state_dict(), 'final_model.pth')
+
+model = BigramLanguageModel()
+model = model.to(device)
+checkpoint = torch.load('best_model.pth', map_location=device)
+model.load_state_dict(checkpoint['model_state_dict'])
+# generate from model
 context = torch.zeros((1,1), dtype=torch.long, device=device)
-print(decode(model.generate(context , max_new_tokens=500)[0].tolist()))
+print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
