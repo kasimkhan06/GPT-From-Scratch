@@ -1,0 +1,31 @@
+# Git metadata (can be huge)
+.git
+.gitignore
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebooks and checkpoints
+notebooks/
+.ipynb_checkpoints/
+
+# macOS/Windows system files
+.DS_Store
+Thumbs.db
+
+# Local IDE settings
+.vscode/
+.idea/
+
+# Large data files not needed for the final app 
+# (Add these if you have raw training data you don't want to deploy)
+# raw_data/
+# temp/
