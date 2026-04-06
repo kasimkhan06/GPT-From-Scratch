@@ -2,6 +2,11 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 import streamlit as st
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, "models", "best_model.pth")
+DATA_PATH = os.path.join(BASE_DIR, "data", "input.txt")
 
 # hyperparameters
 batch_size = 64
@@ -21,7 +26,7 @@ dropout = 0.2
 
 # wget https://raw.githubusercontent.com/karpathy/ng-video-lecture/refs/heads/master/input.txt
 
-with open("input.txt", "r", encoding="utf-8") as f:
+with open(DATA_PATH, "r", encoding="utf-8") as f:
     text = f.read()
 
 # creating vocabulary
@@ -219,7 +224,7 @@ class BigramLanguageModel(nn.Module):
 @st.cache_resource
 def load_model_weights():
     model = BigramLanguageModel()
-    checkpoint = torch.load("best_model.pth", map_location=device)
+    checkpoint = torch.load(MODEL_PATH, map_location=device)
 
     # Check if the file is a full checkpoint or just the state_dict
     if "model_state_dict" in checkpoint:
